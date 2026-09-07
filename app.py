@@ -16,12 +16,16 @@ st.markdown("""
     .sub-header { font-size: 1.2rem; color: #475569; margin-bottom: 20px; }
     .card { background-color: #F8FAFC; border-left: 5px solid #1E3A8A; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
     .stat-card { background-color: #EFF6FF; border: 1px solid #BFDBFE; padding: 15px; border-radius: 8px; text-align: center; }
+    .link-box { background-color: #F0FDF4; border: 1px solid #BBF7D0; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
 # Inicialização do Estado da Sessão (Session State)
 if 'progress' not in st.session_state:
     st.session_state.progress = {f"Dia {i}": False for i in range(1, 36)}
+
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = {}
 
 # ---------------------------------------------------------
 # SIDEBAR: Navegação e Progresso
@@ -32,9 +36,9 @@ semanas = {
     "Semana 1: Infraestrutura de Mercado, Registro e Liquidação": list(range(1, 6)),
     "Semana 2: Proteção do Investidor, Fundos e Derivativos de Crédito": list(range(6, 11)),
     "Semana 3: Tributação pela Receita Federal, IOF e Regime de Hedge Fiscal": list(range(11, 16)),
-    "Semana 4: EXCLUSIVA — Requisitos de Capital Regulatório (Basileia III / SA-CCR)": list(range(16, 21)),
-    "Semana 5: EXCLUSIVA — Contabilidade de Derivativos e Hedge Accounting (IFRS 9)": list(range(21, 26)),
-    "Semana 6: EXCLUSIVA — Recuperação Judicial, Falência e Derivativos (Lei 11.101/05)": list(range(26, 31)),
+    "Semana 4: Requisitos de Capital Regulatório (Basileia III / SA-CCR)": list(range(16, 21)),
+    "Semana 5: Contabilidade de Derivativos e Hedge Accounting (IFRS 9)": list(range(21, 26)),
+    "Semana 6: Recuperação Judicial, Falência e Derivativos (Lei 11.101/05)": list(range(26, 31)),
     "Semana 7: Documentação Jurídica Internacional (ISDA), B3 e Desafio Final": list(range(31, 36))
 }
 
@@ -61,7 +65,7 @@ col1, col2, col3, col4 = st.columns(4)
 col1.metric("Carga Horária Total", "70 Horas", "2h / dia")
 col2.metric("Módulos Regulatórios", "7 Semanas", "35 Dias Úteis")
 col3.metric("Foco da Semana", semana_selecionada.split(":")[0])
-col4.metric("Status do Dia", "Concluído" if st.session_state.progress[dia_selecionado] else "Pendente")
+col4.metric("Status do Dia", "✅ Concluído" if st.session_state.progress[dia_selecionado] else "⏳ Pendente")
 
 st.markdown("---")
 
@@ -72,10 +76,24 @@ if dia_selecionado == "Dia 1":
     st.header("Dia 1: Lei nº 13.018/2014 e Resolução CMN nº 4.593/2017")
     st.caption("Foco: Obrigatoriedade de registro de operações de balcão e validação em infraestruturas de mercado.")
 
-    tab1, tab2, tab3 = st.tabs(["📑 Resumo Executivo & Leitura Guiada", "⚙️ Mecânica Operacional & Impacto", "📝 Quiz & Teste de Fixação"])
+    # LINKS OFICIAIS DAS NORMAS
+    st.markdown("""
+    <div class="link-box">
+        📌 <b>Links Oficiais das Normas do Dia:</b><br>
+        • <a href="https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2014/lei/l13018.htm" target="_blank">Lei nº 13.018/2014 (Planalto) — Registro e depósito de operações de balcão</a><br>
+        • <a href="https://www.bcb.gov.br/estabilidadefinanceira/exibenorma?Membresia&numero=4593" target="_blank">Resolução CMN nº 4.593/2017 (Banco Central) — Validação por infraestruturas de mercado</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📑 Resumo Executivo & Leitura Guiada", 
+        "⚙️ Mecânica Operacional & Impacto", 
+        "📝 Quiz de Fixação", 
+        "💬 Tira-Dúvidas / Assistente AI"
+    ])
 
     with tab1:
-        st.subheader("1. O Marco Legal do Registro Obrigatorio (Lei nº 13.018/2014)")
+        st.subheader("1. O Marco Legal do Registro Obrigatório (Lei nº 13.018/2014)")
         st.markdown("""
         * **Ponto Central:** A Lei 13.018/14 estabeleceu a obrigatoriedade de registro ou de depósito de instrumentos financeiros e operações de derivativos de balcão em entidades administradoras de mercados organizados (como a **B3**).
         * **Finalidade:** Eliminar o "risco cego" de crédito no mercado financeiro nacional, garantindo que o Banco Central e a CVM tenham visibilidade completa das exposições sistêmicas do mercado OTC.
@@ -151,13 +169,41 @@ if dia_selecionado == "Dia 1":
                     st.session_state.progress["Dia 1"] = True
                     st.info("✅ Parabéns! O Dia 1 foi marcado como CONCLUÍDO no seu progresso!")
 
+    with tab4:
+        st.subheader("💬 Canal de Dúvidas sobre o Dia 1")
+        st.caption("Digite sua pergunta sobre a norma ou o caso prático do dia:")
+
+        user_question = st.text_input("Sua dúvida sobre a Lei 13.018/14 ou Res. 4.593/17:", key="q_dia1")
+        if st.button("Enviar Pergunta"):
+            if user_question:
+                if "Dia 1" not in st.session_state.chat_history:
+                    st.session_state.chat_history["Dia 1"] = []
+                
+                # Exemplo de resposta estruturada contextualizada
+                st.session_state.chat_history["Dia 1"].append(("Você", user_question))
+                st.session_state.chat_history["Dia 1"].append(
+                    ("Assistente", f"Em relação à sua dúvida sobre '{user_question}': Lembre-se que, sob a Res. 4.593/17, a tempestividade na validação bilateral das boletas na B3 é indispensável para assegurar a validade do netting contratual no cálculo do RWA_CPF.")
+                )
+
+        if "Dia 1" in st.session_state.chat_history:
+            st.markdown("---")
+            st.write("**Histórico de Perguntas e Respostas:**")
+            for autor, texto in st.session_state.chat_history["Dia 1"]:
+                if autor == "Você":
+                    st.markdown(f"👤 **{autor}:** {texto}")
+                else:
+                    st.markdown(f"🤖 **{autor}:** {texto}")
+
 else:
     st.header(f"{dia_selecionado}: Conteúdo em Preparação")
     st.warning("Este módulo estará disponível no seu cronograma diário conforme você avança na leitura.")
     st.markdown(f"**Tema da Semana:** {semana_selecionada}")
 
-    # Checkbox para marcar manualmente como concluído se desejar
-    concluido = st.checkbox("Marcar este dia como Concluído manualmente", value=st.session_state.progress[dia_selecionado])
-    if concluido != st.session_state.progress[dia_selecionado]:
-        st.session_state.progress[dia_selecionado] = concluido
+st.markdown("---")
+# BOTÃO DE CONCLUSÃO MANUAL DO DIA
+col_btn1, col_btn2 = st.columns([1, 4])
+with col_btn1:
+    is_done = st.checkbox("Marcar como Concluído ✅", value=st.session_state.progress[dia_selecionado])
+    if is_done != st.session_state.progress[dia_selecionado]:
+        st.session_state.progress[dia_selecionado] = is_done
         st.rerun()
